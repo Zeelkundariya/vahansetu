@@ -26,3 +26,10 @@ pip-delete-this-directory.txt
 # ── Project Specific ──
 vahansetu/server_error.log
 .DS_Store
+
+# ── Frontend Lifecycle ──
+node_modules/
+dist/
+dist-ssr/
+*.local
+.eslintcache

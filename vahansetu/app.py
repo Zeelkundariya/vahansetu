@@ -11,6 +11,11 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from mailer import send_vahan_email
 import sqlite3
+from dotenv import load_dotenv
+
+# Load environment variables early for all modules
+load_dotenv()
+
 import random
 import math
 import os
@@ -21,8 +26,8 @@ import concurrent.futures
 from datetime import datetime, timedelta
 
 app = Flask(__name__, static_folder='client/dist', static_url_path='/', template_folder='client/dist')
-app.config['JWT_SECRET'] = 'vahan-jwt-quantum-vault-2026'
-app.secret_key = 'vs-ultra-secure-key-2026'
+app.config['JWT_SECRET'] = os.getenv('JWT_SECRET', 'fallback-secret-for-dev-only')
+app.secret_key = os.getenv('SECRET_KEY', 'another-fallback-secret')
 CORS(app)
 
 # ---------- Initialization & Persistence ----------
@@ -758,7 +763,7 @@ def trip_plan():
         print(f"TRIP ERROR: {e}")
         return jsonify({"error": "Quantum Route Engine Failure. Ensure city names are precise."}), 500
 
-@app.route('/premium/verify', methods=['POST'])
+@app.route('/api/premium/verify', methods=['POST'])
 @login_required
 def premium_verify():
     data = request.json or {}
@@ -767,7 +772,7 @@ def premium_verify():
     conn.commit(); conn.close()
     return jsonify({'success': True})
 
-@app.route('/premium/cancel', methods=['POST'])
+@app.route('/api/premium/cancel', methods=['POST'])
 @login_required
 def premium_cancel():
     conn = get_db_connection()
