@@ -3,7 +3,7 @@ services:
     name: vahansetu
     env: python
     buildCommand: ./build.sh
-    startCommand: gunicorn app:app
+    startCommand: gunicorn --pythonpath vahansetu app:app
     envVars:
       - key: PORT
         value: 10000
@@ -15,8 +15,3 @@ services:
         generateValue: true
       - key: PYTHON_VERSION
         value: 3.10.0
-    # Optional: If you want persistent SQLite, you'd add a disk here.
-    # disk:
-    #   name: vahan-db
-    #   mountPath: /data
-    #   sizeGB: 1
