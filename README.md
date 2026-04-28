@@ -106,13 +106,13 @@ VahanSetu is hardened with enterprise-grade defense layers:
 ### 🛠️ Installation
 1.  **Backend Setup**:
     ```bash
-    cd server
+    cd vahansetu
     pip install -r requirements.txt
     python app.py
     ```
 2.  **Frontend Setup**:
     ```bash
-    cd client
+    cd vahansetu/client
     npm install
     npm run dev
     ```
