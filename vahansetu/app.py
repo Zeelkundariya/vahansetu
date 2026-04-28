@@ -26,7 +26,8 @@ from datetime import datetime, timedelta
 app = Flask(__name__, static_folder='client/dist', static_url_path='/', template_folder='client/dist')
 app.config['JWT_SECRET'] = os.getenv('JWT_SECRET', 'vahan-jwt-quantum-vault-2026')
 app.secret_key = os.getenv('SECRET_KEY', 'vs-ultra-secure-key-2026')
-CORS(app)
+CORS(app, supports_credentials=True)
+app.url_map.strict_slashes = False
 
 # ΓöÇΓöÇ VAHAN INTELLIGENCE: SIMULATION & PREDICTION ENGINE ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 class VahanIntelligence:
@@ -247,7 +248,7 @@ def api_me():
         return jsonify({'id': current_user.id, 'name': current_user.name, 'email': current_user.email, 'role': current_user.role, 'is_premium': current_user.is_premium})
     return jsonify(None), 401
 
-@app.route('/signup', methods=['GET', 'POST'])
+@app.route('/signup', methods=['GET', 'POST'], strict_slashes=False)
 def signup():
     if request.method == 'GET':
         return redirect(url_for('serve'))
@@ -284,7 +285,7 @@ def signup():
         return redirect(url_for('serve'))
     finally: conn.close()
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'], strict_slashes=False)
 def login():
     if request.method == 'GET':
         return redirect(url_for('serve'))
