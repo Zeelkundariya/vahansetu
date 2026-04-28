@@ -30,8 +30,8 @@ export const getProfile = () => api.get('/api/profile_data');
 export const getNotifications = () => api.get('/api/notifications');
 export const updateProfile = (name) => api.post('/api/profile/update', { name });
 export const changePw = (current, newPw, confirm) => api.post('/api/change_password', { current_password: current, new_password: newPw, confirm_password: confirm });
-export const verifyPremium = (payment_id, plan) => api.post('/premium/verify', { payment_id, plan });
-export const cancelPremium = () => api.post('/premium/cancel');
+export const verifyPremium = (payment_id, plan) => api.post('/api/premium/verify', { payment_id, plan });
+export const cancelPremium = () => api.post('/api/premium/cancel');
 export const addStation = (data) => {
   const form = new FormData();
   Object.entries(data).forEach(([k, v]) => form.append(k, v));

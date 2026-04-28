@@ -144,17 +144,21 @@ export default function MapPage() {
         navigator.geolocation.getCurrentPosition((p) => {
           const coords = [p.coords.latitude, p.coords.longitude];
           setUserPos(coords);
-          if (mapRef.current) {
-            mapRef.current.setView(coords, 14);
+          if (mapRef.current && mapRef.current.getContainer()) {
+            try {
+              mapRef.current.setView(coords, 14);
+            } catch (e) {
+              console.warn("Map view update deferred: Container not ready.");
+            }
           }
           fetchStations(coords[0], coords[1]);
           showToast('Tactical GPS Handshake Complete', 'success');
         }, () => {
-          console.warn('GPS Signal Search Timed Out - Defaulting to Bangalore baseline');
-          fetchStations(12.9716, 77.5946); // Bangalore
+          console.warn('GPS Signal Search Timed Out - Defaulting to Ahmedabad baseline');
+          fetchStations(23.0225, 72.5714); // Ahmedabad
         }, { timeout: 10000, enableHighAccuracy: true });
       } else {
-        fetchStations(12.9716, 77.5946);
+        fetchStations(23.0225, 72.5714);
       }
     };
 
@@ -187,7 +191,7 @@ export default function MapPage() {
       const centerLng = lng !== undefined ? lng : (userPos ? userPos[1] : 72.5714);
       params.lat = centerLat; params.lng = centerLng;
       
-      const res = await api.get('/api/stations', { params });
+      const res = await api.get('/api/stations', { params: { ...params, _t: Date.now() } });
       setStations(res.data);
     } catch { showToast('Network: Stations unreachable', 'error'); }
   };
@@ -322,7 +326,7 @@ export default function MapPage() {
       <Navbar />
       <div className="app-body" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div className="map-wrap">
-          <MapContainer center={[12.97, 77.59]} zoom={12} zoomControl={false} style={{ width: '100%', height: '100%' }}
+          <MapContainer center={[23.0225, 72.5714]} zoom={12} zoomControl={false} style={{ width: '100%', height: '100%' }}
             onClick={(e) => {
               if (isSettingStart) {
                 setUserPos([e.latlng.lat, e.latlng.lng]);

@@ -314,3 +314,4 @@
   #sidebar.open { transform: translateX(0); }
   .map-sidebar-toggle { display: flex !important; }
 }
+}
