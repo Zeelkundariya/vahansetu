@@ -238,13 +238,7 @@ def validate_session():
 
 # ---------- Core Routing Engine ----------
 
-# ΓöÇΓöÇ SERVE REACT FRONTEND ΓöÇΓöÇ
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve(path):
-    if path != "" and os.path.exists(app.static_folder + '/' + path):
-        return send_from_directory(app.static_folder, path)
-    return render_template("index.html")
+
 
 # ΓöÇΓöÇ JSON API: /api/me ΓöÇΓöÇ
 @app.route('/api/me')
@@ -1053,6 +1047,14 @@ def get_digital_twin(vehicle_id):
         },
         'timestamp': datetime.now().isoformat()
     })
+
+# ΓöÇΓöÇ SERVE REACT FRONTEND ΓöÇΓöÇ
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    return render_template("index.html")
 
 if __name__ == '__main__':
     init_db()
