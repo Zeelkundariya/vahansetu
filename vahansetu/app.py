@@ -134,7 +134,7 @@ def seed_user_data(user_id, conn):
             (fleet_id, 'Metro Delivery-04', 'GJ-01-AX-9999', 1200.0, 14400.0, 'idle', 95, 23.01, 72.55),
             (fleet_id, 'Executive Sedan 09', 'MH-01-EQ-7777', 2100.0, 25200.0, 'charging', 65, 19.0760, 72.8777)
         ]
-        conn.executemany('INSERT INTO fleet_vehicles (fleet_id, vehicle_name, vehicle_number, total_kwh, total_spend, status, battery_pct, lat, lng) VALUES (?,?,?,?,?,?,?,?,?)', demo_v)
+        conn.executemany('INSERT INTO fleet_vehicles (fleet_id, vehicle_name, vehicle_number, total_energy, total_cost, status, battery_pct, lat, lng) VALUES (?,?,?,?,?,?,?,?,?)', demo_v)
         
     # 3. Ensure some host stations exist
     s_count = conn.execute('SELECT COUNT(*) FROM stations WHERE owner_id = ?', (user_id,)).fetchone()[0]
@@ -374,7 +374,7 @@ def api_fleet():
             demo = [(fleet['id'],'Ahmedabad Express-01','GJ-01-EV-1200',1540.0,18500.0,23.0225,72.5714,'idle',82),
                     (fleet['id'],'Gandhinagar Courier','GJ-18-AV-9981',2200.0,26400.0,23.2156,72.6369,'charging',45),
                     (fleet['id'],'Kalol Industrial Ops','GJ-18-TX-0052',4500.0,54000.0,23.23,72.51,'low_battery',12)]
-            conn.executemany('INSERT INTO fleet_vehicles (fleet_id,vehicle_name,vehicle_number,total_kwh,total_spend,lat,lng,status,battery_pct) VALUES (?,?,?,?,?,?,?,?,?)', demo)
+            conn.executemany('INSERT INTO fleet_vehicles (fleet_id,vehicle_name,vehicle_number,total_energy,total_cost,lat,lng,status,battery_pct) VALUES (?,?,?,?,?,?,?,?,?)', demo)
             conn.commit()
         vehicles = [dict(v) for v in conn.execute('SELECT * FROM fleet_vehicles WHERE fleet_id = ?', (fleet['id'],)).fetchall()]
         print(f"DEBUG: api_fleet - user_id: {current_user.id}, fleet_id: {fleet['id']}, vehicle_count: {len(vehicles)}")
@@ -439,7 +439,7 @@ def fleet_add():
             fleet_id = fleet['id']
             
         # Add vehicle with randomized telemetry
-        conn.execute('INSERT INTO fleet_vehicles (fleet_id, vehicle_name, vehicle_number, total_kwh, total_spend, status, battery_pct, lat, lng) VALUES (?,?,?,?,?,?,?,?,?)',
+        conn.execute('INSERT INTO fleet_vehicles (fleet_id, vehicle_name, vehicle_number, total_energy, total_cost, status, battery_pct, lat, lng) VALUES (?,?,?,?,?,?,?,?,?)',
                      (fleet_id, name, plate, 0, 0, 'idle', random.randint(30, 95), 23.0225, 72.5714))
         conn.commit()
         return jsonify({'success': True})

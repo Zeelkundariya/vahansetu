@@ -3,7 +3,7 @@
 set -o errexit
 
 # Install Python dependencies from the subfolder
-pip install -r requirements.txt
+pip install -r vahansetu/requirements.txt
 
 # Install and Build Frontend
 cd vahansetu/client
