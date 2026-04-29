@@ -23,7 +23,13 @@ import jwt
 import concurrent.futures
 from datetime import datetime, timedelta
 
-app = Flask(__name__, static_folder='client/dist', static_url_path='/', template_folder='client/dist')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, 'client', 'dist')
+
+app = Flask(__name__, 
+            static_folder=STATIC_DIR, 
+            static_url_path='/', 
+            template_folder=STATIC_DIR)
 app.config['JWT_SECRET'] = os.getenv('JWT_SECRET', 'vahan-jwt-quantum-vault-2026')
 app.secret_key = os.getenv('SECRET_KEY', 'vs-ultra-secure-key-2026')
 CORS(app, supports_credentials=True)
