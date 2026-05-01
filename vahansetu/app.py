@@ -24,7 +24,7 @@ import concurrent.futures
 from datetime import datetime, timedelta
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, 'vahansetu', 'client', 'dist')
+STATIC_DIR = os.path.join(BASE_DIR, 'client', 'dist')
 
 app = Flask(__name__, 
             static_folder=STATIC_DIR, 
