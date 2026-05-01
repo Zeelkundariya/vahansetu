@@ -6,6 +6,9 @@ import {
   HeartPulse, X, ShieldCheck
 } from 'lucide-react';
 import { api, showToast } from '../api';
+import { Helmet } from 'react-helmet-async';
+import * as Yup from 'yup';
+import socket, { connectSocket, disconnectSocket } from '../utils/socket';
 
 export default function CpoPage() {
   const [stations, setStations] = useState([]);
@@ -24,10 +27,34 @@ export default function CpoPage() {
     name: '', address: '', lat: '', lng: '', connector: 'CCS2 Combo (DC Fast)', power: 60, bays: 4
   });
 
+  const deploySchema = Yup.object().shape({
+    name: Yup.string().required('🛡️ Node identity required.'),
+    address: Yup.string().required('🛡️ Street address required.'),
+    lat: Yup.number().typeError('⚠️ Lat must be numeric.').required('🛡️ Latitude required.'),
+    lng: Yup.number().typeError('⚠️ Lng must be numeric.').required('🛡️ Longitude required.'),
+    power: Yup.number().min(1, '⚠️ Power must be positive.').required('🛡️ Power rating required.'),
+    bays: Yup.number().min(1, '⚠️ At least 1 bay required.').required('🛡️ Bay count required.')
+  });
+
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 10000); // Live sync
-    return () => clearInterval(interval);
+    connectSocket();
+    
+    socket.on('stations_pulse', () => {
+      console.log("⚡ Telemetry Pulse Received");
+      fetchData();
+    });
+
+    socket.on('infrastructure_deployed', (data) => {
+      showToast(`🌐 NEW NODE DETECTED: ${data.name}`, 'info');
+      fetchData();
+    });
+
+    return () => {
+      socket.off('stations_pulse');
+      socket.off('infrastructure_deployed');
+      disconnectSocket();
+    };
   }, []);
 
   const fetchData = async () => {
@@ -49,6 +76,7 @@ export default function CpoPage() {
     e.preventDefault();
     setDeployLoading(true);
     try {
+      await deploySchema.validate(deployData);
       const res = await api.post('/api/host/deploy', deployData);
       if (res.data.success) {
         showToast(res.data.message, 'success');
@@ -58,8 +86,12 @@ export default function CpoPage() {
       } else {
         showToast(res.data.message || 'Deployment Rejected', 'error');
       }
-    } catch (e) {
-      showToast('Quantum Provisioning Error', 'error');
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        showToast(err.message, 'warning');
+      } else {
+        showToast('Quantum Provisioning Error', 'error');
+      }
     } finally {
       setDeployLoading(false);
     }
@@ -101,6 +133,10 @@ export default function CpoPage() {
 
   return (
     <div className="app">
+      <Helmet>
+        <title>VahanSetu | Infrastructure Console</title>
+        <meta name="description" content="Manage your EV charging nodes, monitor real-time telemetry, and track revenue analytics." />
+      </Helmet>
       <Navbar />
       
       <div className="page-wrapper">

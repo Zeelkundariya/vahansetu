@@ -6,6 +6,8 @@ import {
   PlusCircle, Search, RefreshCcw, Car, Calendar, 
   Edit3, Trash2, Bot, ShieldAlert, X, Sparkles, MapPin
 } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
+import socket, { connectSocket, disconnectSocket } from '../utils/socket';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 
@@ -56,8 +58,18 @@ export default function FleetPage() {
 
   useEffect(() => {
     fetchData();
+    connectSocket();
+    
+    socket.on('stations_pulse', () => {
+      fetchData();
+    });
+
     const interval = setInterval(pushRandomIncident, 5000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      socket.off('stations_pulse');
+      disconnectSocket();
+    };
   }, []);
 
   useEffect(() => {
@@ -210,6 +222,10 @@ export default function FleetPage() {
 
   return (
     <div className="app">
+      <Helmet>
+        <title>VahanSetu | Fleet Operations Portal</title>
+        <meta name="description" content="Real-time telemetry and AI routing for your registered EV assets. Monitor battery health, positioning, and operational logs." />
+      </Helmet>
       <Navbar />
       <div className="page-wrapper">
         <div className="page-content">

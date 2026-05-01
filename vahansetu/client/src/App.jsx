@@ -1,12 +1,18 @@
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import LandingPage from './pages/LandingPage';
-import MapPage from './pages/MapPage';
-import FleetPage from './pages/FleetPage';
-import CpoPage from './pages/CpoPage';
-import AnalyticsPage from './pages/AnalyticsPage';
-import ProfilePage from './pages/ProfilePage';
-import PremiumPage from './pages/PremiumPage';
+import ErrorBoundary from './components/ErrorBoundary';
+
+// Lazy load components for performance
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const MapPage = lazy(() => import('./pages/MapPage'));
+const FleetPage = lazy(() => import('./pages/FleetPage'));
+const CpoPage = lazy(() => import('./pages/CpoPage'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const PremiumPage = lazy(() => import('./pages/PremiumPage'));
+
 import Toast from './components/Toast';
 import Background from './components/Background';
 
@@ -22,30 +28,45 @@ function Protected({ children }) {
   return user ? children : <Navigate to="/" replace />;
 }
 
+const LoadingFallback = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-deep)' }}>
+    <div className="vs-spinner"></div>
+  </div>
+);
+
 function AppRoutes() {
   const { user } = useAuth();
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/map"       element={<Protected><MapPage /></Protected>} />
-      <Route path="/fleet"     element={<Protected><FleetPage /></Protected>} />
-      <Route path="/cpo"       element={<Protected><CpoPage /></Protected>} />
-      <Route path="/analytics" element={<Protected><AnalyticsPage /></Protected>} />
-      <Route path="/profile"   element={<Protected><ProfilePage /></Protected>} />
-      <Route path="/premium"   element={<Protected><PremiumPage /></Protected>} />
-      <Route path="*"          element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/map"       element={<Protected><MapPage /></Protected>} />
+        <Route path="/fleet"     element={<Protected><FleetPage /></Protected>} />
+        <Route path="/cpo"       element={<Protected><CpoPage /></Protected>} />
+        <Route path="/analytics" element={<Protected><AnalyticsPage /></Protected>} />
+        <Route path="/profile"   element={<Protected><ProfilePage /></Protected>} />
+        <Route path="/premium"   element={<Protected><PremiumPage /></Protected>} />
+        <Route path="*"          element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Background />
-        <Toast />
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <a href="#main-content" className="skip-link">Skip to main content</a>
+            <Background />
+            <Toast />
+            <div id="main-content">
+              <AppRoutes />
+            </div>
+          </AuthProvider>
+        </BrowserRouter>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 }

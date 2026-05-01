@@ -10,6 +10,8 @@ import {
   Flame, CheckSquare, Info, Bell, AlertTriangle, ArrowUpLeft, ArrowUpRight
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import socket, { connectSocket, disconnectSocket } from '../utils/socket';
 
 // Fix Leaflet's default icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -170,6 +172,21 @@ export default function MapPage() {
       const pos = [parseFloat(params.get('lat')), parseFloat(params.get('lng'))];
       setTimeout(() => mapRef.current?.flyTo(pos, 16), 500);
     }
+
+    // Socket listeners for real-time station occupancy
+    connectSocket();
+    socket.on('stations_pulse', () => {
+      fetchStations();
+    });
+    socket.on('infrastructure_deployed', () => {
+      fetchStations();
+    });
+
+    return () => {
+      socket.off('stations_pulse');
+      socket.off('infrastructure_deployed');
+      disconnectSocket();
+    };
   }, [loc.search]);
   
 
@@ -323,6 +340,10 @@ export default function MapPage() {
 
   return (
     <div className="app map-mode" style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <Helmet>
+        <title>VahanSetu | Live Charging Network</title>
+        <meta name="description" content="Real-time EV charging station discovery, AI-powered route planning, and live occupancy tracking across India." />
+      </Helmet>
       <Navbar />
       <div className="app-body" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div className="map-wrap">
