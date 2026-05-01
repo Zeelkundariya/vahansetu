@@ -76,8 +76,8 @@ def run_simulations():
             time.sleep(30) # Pulse every 30 seconds
         except: pass
 
-import threading
-threading.Thread(target=run_simulations, daemon=True).start()
+# Simulation thread will be started after init_db()
+sim_thread = None
 
 # ---------- Initialization & Persistence ----------
 
@@ -200,7 +200,13 @@ def seed_user_data(user_id, conn):
 
     conn.commit()
 
+# Ensure DB is initialized
 init_db()
+
+# Start Simulation background thread AFTER DB is ready
+import threading
+threading.Thread(target=run_simulations, daemon=True).start()
+
 
 # ---------- Identity Management ----------
 
@@ -278,6 +284,34 @@ def api_me():
 @app.route('/test-api')
 def test_api():
     return jsonify({'status': 'ok', 'message': 'VahanSetu Production Engine Live'})
+
+@app.route('/health')
+def health_check():
+    health = {
+        'status': 'healthy',
+        'database': 'unknown',
+        'filesystem': 'unknown',
+        'static_folder': app.static_folder,
+        'index_exists': os.path.exists(os.path.join(app.static_folder, 'index.html'))
+    }
+    try:
+        conn = get_db_connection()
+        conn.execute('SELECT 1').fetchone()
+        conn.close()
+        health['database'] = 'connected'
+    except Exception as e:
+        health['database'] = f'error: {str(e)}'
+        health['status'] = 'degraded'
+    
+    return jsonify(health)
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Pass through HTTP errors
+    if hasattr(e, 'code'): return jsonify({'error': str(e), 'code': e.code}), e.code
+    import traceback
+    print(traceback.format_exc())
+    return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
 
 @app.route('/signup', methods=['GET', 'POST'], strict_slashes=False)
 def signup():
@@ -1114,9 +1148,17 @@ def get_digital_twin(vehicle_id):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if path != "" and os.path.exists(app.static_folder + '/' + path):
+    # Security: check if path exists in static folder
+    full_path = os.path.join(app.static_folder, path)
+    if path != "" and os.path.exists(full_path):
         return send_from_directory(app.static_folder, path)
-    return render_template("index.html")
+    
+    # Fallback to index.html for React SPA routing
+    index_path = os.path.join(app.static_folder, 'index.html')
+    if os.path.exists(index_path):
+        return send_from_directory(app.static_folder, 'index.html')
+    
+    return f"<h1>VahanSetu Engine Live</h1><p>Frontend artifacts missing at: {app.static_folder}</p><p>Please check build logs.</p>", 404
 
 if __name__ == '__main__':
     init_db()
