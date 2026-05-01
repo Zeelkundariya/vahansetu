@@ -3,7 +3,7 @@ services:
     name: vahansetu
     env: python
     buildCommand: ./build.sh
-    startCommand: gunicorn --pythonpath vahansetu app:app --bind 0.0.0.0:$PORT
+    startCommand: gunicorn --chdir vahansetu app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PORT
         value: 10000

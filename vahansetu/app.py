@@ -35,7 +35,7 @@ app.secret_key = os.getenv('SECRET_KEY', 'vs-ultra-secure-key-2026')
 CORS(app, supports_credentials=True)
 app.url_map.strict_slashes = False
 
-# ΓöÇΓöÇ VAHAN INTELLIGENCE: SIMULATION & PREDICTION ENGINE ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+# --- VAHAN INTELLIGENCE: SIMULATION & PREDICTION ENGINE ---
 class VahanIntelligence:
     @staticmethod
     def get_predictive_pricing():
@@ -251,7 +251,7 @@ def validate_session():
             logout_user()
             if request.path.startswith('/api/'):
                 return jsonify({'error': 'Session expired'}), 401
-            flash('≡ƒ¢í∩╕Å Security Protocol Violation: Session token missing.', 'error')
+            flash('Security Protocol Violation: Session token missing.', 'error')
             return redirect(url_for('serve'))
         
         payload = verify_jwt(token)
@@ -259,7 +259,7 @@ def validate_session():
             logout_user()
             if request.path.startswith('/api/'):
                 return jsonify({'error': 'Invalid token'}), 401
-            flash('≡ƒ¢í∩╕Å Security Protocol Violation: Token mismatch.', 'error')
+            flash('Security Protocol Violation: Token mismatch.', 'error')
             return redirect(url_for('serve'))
     elif not current_user.is_authenticated and request.path.startswith('/api/') and request.path != '/api/me':
         return jsonify({'error': 'Authentication required'}), 401
@@ -268,7 +268,7 @@ def validate_session():
 
 
 
-# ΓöÇΓöÇ JSON API: /api/me ΓöÇΓöÇ
+# --- JSON API: /api/me ---
 @app.route('/api/me')
 def api_me():
     if current_user.is_authenticated:
@@ -303,11 +303,11 @@ def signup():
                      (name, email, generate_password_hash(password)))
         conn.commit()
         try:
-            send_vahan_email(to_email=email, subject="≡ƒÆÄ VAHANSETU: Provisioning Success", title=f"Welcome, {name}!", message="Your account has been created. Please log in.", action_text="Login")
+            send_vahan_email(to_email=email, subject="VAHANSETU: Provisioning Success", title=f"Welcome, {name}!", message="Your account has been created. Please log in.", action_text="Login")
         except: pass
         if is_api:
             return jsonify({'success': True, 'message': 'Account created! Please log in.'})
-        flash('≡ƒÆÄ Identity Provisioned: Please log in.', 'success')
+        flash('Identity Provisioned: Please log in.', 'success')
         return redirect(url_for('serve'))
     except Exception as e:
         if is_api:
@@ -347,7 +347,7 @@ def login():
             conn.execute('INSERT INTO security_logs (user_id, ip_address, device_agent, status) VALUES (?, ?, ?, ?)',
                          (u['id'], request.remote_addr, request.headers.get('User-Agent', 'Unknown'), 'Success'))
             conn.commit(); conn.close()
-            send_vahan_email(to_email=email, subject="≡ƒöö VahanSetu ΓÇö Secure Login Detected", title="Login Successful", message=f"Session initiated from {request.remote_addr}.", action_text="Open Dashboard")
+            send_vahan_email(to_email=email, subject="VahanSetu - Secure Login Detected", title="Login Successful", message=f"Session initiated from {request.remote_addr}.", action_text="Open Dashboard")
         except: pass
         
         # Return JSON for React, redirect for HTML
@@ -356,7 +356,7 @@ def login():
         else:
             resp = redirect('/')
         resp.set_cookie('vs_jwt_nexus', token, httponly=True, samesite='Lax')
-        if not is_api: flash(f'≡ƒ¢í∩╕Å Access Granted: {u["name"]}.', 'success')
+        if not is_api: flash(f'Access Granted: {u["name"]}.', 'success')
         return resp
     
     if u:
@@ -1110,7 +1110,7 @@ def get_digital_twin(vehicle_id):
         'timestamp': datetime.now().isoformat()
     })
 
-# ΓöÇΓöÇ SERVE REACT FRONTEND ΓöÇΓöÇ
+# --- SERVE REACT FRONTEND ---
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
