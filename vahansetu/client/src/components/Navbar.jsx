@@ -43,8 +43,8 @@ export default function Navbar() {
   return (
     <nav className="vs-navbar" role="navigation" aria-label="Main navigation">
       {/* ── LOGO ── */}
-      <Link to="/map" className="vs-logo" style={{ textDecoration: 'none' }}>
-        <Logo />
+      <Link to="/map" className="vs-logo" aria-label="VahanSetu Home - Return to Map" style={{ textDecoration: 'none' }}>
+        <Logo aria-hidden="true" />
       </Link>
 
       {/* ── NAV LINKS (centre) ── */}

@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import { Helmet } from 'react-helmet-async';
+import * as Yup from 'yup';
 
 function CountUp({ value, suffix = '', duration = 2000 }) {
   const [display, setDisplay] = useState(0);
@@ -33,6 +35,19 @@ function CountUp({ value, suffix = '', duration = 2000 }) {
   return <span>{formatted}{suffix}</span>;
 }
 
+const authSchema = Yup.object().shape({
+  name: Yup.string().test('is-signup', '🛡️ Name required for identity provisioning.', function(value) {
+    return this.parent.authTab === 'login' || (value && value.trim().length > 0);
+  }),
+  email: Yup.string()
+    .email('⚠️ Invalid gmail protocol.')
+    .required('🛡️ Identity required.')
+    .matches(/@gmail\.com$/, '⚠️ Only Gmail accounts accepted in this sector.'),
+  password: Yup.string()
+    .min(6, '⚠️ Access key must be 6+ characters.')
+    .required('🛡️ Access key required.')
+});
+
 export default function LandingPage() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
@@ -46,9 +61,10 @@ export default function LandingPage() {
   }, [authTab]);
 
   const handleAuth = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setLoading(true);
     try {
+      await authSchema.validate({ ...formData, authTab });
       const endpoint = authTab === 'login' ? '/login' : '/signup';
       const { data } = await api.post(endpoint, formData);
       if (data.success) {
@@ -64,7 +80,11 @@ export default function LandingPage() {
         showToast(data.message || 'Authentication Failure', 'error');
       }
     } catch (err) {
-      showToast(err.response?.data?.message || 'Security Protocol: Connection Refused', 'error');
+      if (err instanceof Yup.ValidationError) {
+        showToast(err.message, 'warning');
+      } else {
+        showToast(err.response?.data?.message || 'Security Protocol: Connection Refused', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -72,6 +92,10 @@ export default function LandingPage() {
 
   return (
     <div className="landing-wrapper">
+      <Helmet>
+        <title>VahanSetu — Bridge to the Electric Future</title>
+        <meta name="description" content="India's most advanced EV charging network. Discover stations in real-time, plan AI-optimized routes, and manage your fleet." />
+      </Helmet>
       {/* ── LANDING NAVBAR ── */}
       <nav className="vs-navbar" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000, padding: '18px 80px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', backdropFilter: 'none' }}>
         <Link to="/" className="vs-logo" style={{ textDecoration: 'none' }}>

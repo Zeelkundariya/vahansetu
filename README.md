@@ -12,6 +12,26 @@ VahanSetu provides specialized portals for **Drivers**, **Fleet Managers**, and 
 - **VahanPay**: Secure digital wallet for instant charging sessions.
 - **Carbon Marketplace**: Trade earned credits for green energy incentives.
 
+### 💻 Tech Stack
+- **Frontend**: React 18, Vite, Context API, Lucide Icons
+- **Backend**: Python 3.x, Flask, Flask-SocketIO, SQLite (WAL Mode)
+- **Maps**: Leaflet.js with custom OSRM integration
+- **Analytics**: Chart.js for real-time telemetry visualization
+- **Styling**: Vanilla CSS with Glassmorphism Design System
+
+### 📁 Folder Structure
+```text
+/vahansetu
+├── client/              # React frontend (Vite)
+│   ├── src/
+│   │   ├── api/         # Axios centralized service
+│   │   ├── components/  # Reusable UI components
+│   │   ├── pages/       # Route-level pages
+│   │   └── context/     # Auth & Global state
+├── app.py               # Main Flask server
+└── stations.db          # Persistence layer (SQLite)
+```
+
 ---
 
 ### 🚀 Getting Started

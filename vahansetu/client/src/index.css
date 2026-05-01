@@ -6,6 +6,14 @@
 .page-wrapper { flex: 1; overflow-y: auto; overflow-x: hidden; width: 100%; position: relative; }
 .page-content { padding: 40px 80px 100px; max-width: 1500px; margin: 0 auto; width: 100%; }
 
+.skip-link {
+  position: absolute; top: -100px; left: 24px;
+  background: var(--cyan); color: #000; padding: 10px 20px;
+  border-radius: 0 0 12px 12px; font-weight: 800; z-index: 10000;
+  transition: top 0.3s var(--ease-spring);
+}
+.skip-link:focus { top: 0; outline: 3px solid var(--purple); }
+
 /* ── LANDING PAGE SPECIFIC ── */
 .hero {
   min-height: 100vh;
@@ -314,4 +322,46 @@
   #sidebar.open { transform: translateX(0); }
   .map-sidebar-toggle { display: flex !important; }
 }
+
+/* ── CUSTOM SCROLLBAR ── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { 
+  background: var(--glass-border); 
+  border-radius: 10px; 
+  border: 2px solid var(--bg-deep);
 }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan-border); }
+
+/* ── TOAST NOTIFICATIONS ── */
+.vs-toast-container { 
+  position: fixed; top: 24px; right: 24px; z-index: 9999; 
+  display: flex; flex-direction: column; gap: 12px; pointer-events: none;
+}
+.vs-toast { 
+  pointer-events: auto; min-width: 320px; max-width: 420px;
+  background: rgba(4, 6, 15, 0.92); backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;
+  padding: 16px 20px; display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5); cursor: pointer;
+  animation: toast-in 0.5s var(--ease-spring); position: relative; overflow: hidden;
+}
+@keyframes toast-in { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+.vs-toast-icon { 
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.vs-toast.success .vs-toast-icon { background: rgba(0, 255, 163, 0.1); color: var(--green); }
+.vs-toast.error .vs-toast-icon   { background: rgba(255, 61, 107, 0.1); color: var(--red); }
+.vs-toast.warning .vs-toast-icon { background: rgba(255, 214, 10, 0.1); color: var(--gold); }
+.vs-toast.info .vs-toast-icon    { background: rgba(0, 240, 255, 0.1); color: var(--cyan); }
+
+.vs-toast-content { flex: 1; font-size: 0.88rem; font-weight: 500; color: #fff; line-height: 1.4; }
+.vs-toast-close { background: none; border: none; color: var(--text-muted); opacity: 0.5; cursor: pointer; padding: 4px; transition: 0.2s; }
+.vs-toast-close:hover { opacity: 1; color: #fff; }
+
+.vs-toast-progress { 
+  position: absolute; bottom: 0; left: 0; height: 2px; background: currentColor;
+  width: 100%; animation: toast-progress 4s linear forwards; opacity: 0.3;
+}
+@keyframes toast-progress { from { width: 100%; } to { width: 0%; } }

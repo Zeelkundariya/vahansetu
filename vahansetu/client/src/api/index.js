@@ -7,18 +7,42 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 });
 
+// REQUEST INTERCEPTOR: Attach telemetry/security headers
+api.interceptors.request.use(config => {
+  config.headers['X-Vahan-Client'] = 'VahanSetu-Nexus-2026';
+  return config;
+}, error => Promise.reject(error));
+
+// RESPONSE INTERCEPTOR: Global Error Shield
+api.interceptors.response.use(
+  response => response,
+  error => {
+    const { status, config } = error.response || {};
+    const isPublicPage = window.location.pathname === '/';
+    const isMeRequest = config?.url?.includes('/api/me');
+    
+    if (status === 401) {
+      // Avoid redirect loops and "expired" toasts on the landing page during initial load
+      if (!isPublicPage && !isMeRequest) {
+        console.warn("🛡️ Security Protocol: Session invalid. Redirecting to Nexus.");
+        window.location.href = '/';
+        showToast('🔒 Session expired. Please re-authenticate.', 'warning');
+      }
+    } else if (status >= 500) {
+      showToast('⚠️ Subsystem Link Failure: Server error occurred.', 'error');
+    } else if (error.code === 'ECONNABORTED') {
+      showToast('📡 Connection Timeout: Signal lost.', 'error');
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 export { showToast, api };
 
-export const login = (email, password) => {
-  return api.post('/login', { email, password });
-};
-
-export const signup = (name, email, password) => {
-  return api.post('/signup', { name, email, password });
-};
-
-export const logout = () => axios.get('/logout', { withCredentials: true });
-
+export const login = (email, password) => api.post('/login', { email, password });
+export const signup = (name, email, password) => api.post('/signup', { name, email, password });
+export const logout = () => api.get('/logout');
 export const getMe = () => api.get('/api/me');
 export const getStations = (lat, lng) => api.get(`/api/stations${lat != null ? `?lat=${lat}&lng=${lng}` : ''}`);
 export const getTripPlan = (params) => api.get('/api/trip_plan', { params });
@@ -32,11 +56,7 @@ export const updateProfile = (name) => api.post('/api/profile/update', { name })
 export const changePw = (current, newPw, confirm) => api.post('/api/change_password', { current_password: current, new_password: newPw, confirm_password: confirm });
 export const verifyPremium = (payment_id, plan) => api.post('/api/premium/verify', { payment_id, plan });
 export const cancelPremium = () => api.post('/api/premium/cancel');
-export const addStation = (data) => {
-  const form = new FormData();
-  Object.entries(data).forEach(([k, v]) => form.append(k, v));
-  return axios.post('/api/host/add_station', form, { withCredentials: true });
-};
-export const deleteStation = (id) => axios.post(`/api/host/delete_station/${id}`, {}, { withCredentials: true });
+export const addStation = (data) => api.post('/api/host/deploy', data);
+export const deleteStation = (id) => api.delete(`/api/host/station/${id}`);
 
 export default api;

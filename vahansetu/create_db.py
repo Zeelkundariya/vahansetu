@@ -40,6 +40,7 @@ add_column_if_not_exists('stations', 'station_type', 'TEXT DEFAULT "city"')
 add_column_if_not_exists('stations', 'owner_id', 'INTEGER')
 add_column_if_not_exists('stations', 'price_per_kwh', 'REAL DEFAULT 15.0')
 add_column_if_not_exists('stations', 'last_updated', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+add_column_if_not_exists('stations', 'queue_length', 'INTEGER DEFAULT 0')
 
 # --- Users table ---
 cursor.execute('''
@@ -158,8 +159,8 @@ cursor.execute('''
         fleet_id INTEGER NOT NULL,
         vehicle_name TEXT NOT NULL,
         vehicle_number TEXT NOT NULL,
-        total_kwh REAL DEFAULT 0,
-        total_spend REAL DEFAULT 0,
+        total_energy REAL DEFAULT 0,
+        total_cost REAL DEFAULT 0,
         status TEXT DEFAULT 'idle',
         battery_pct INTEGER DEFAULT 80,
         lat REAL,
@@ -168,8 +169,8 @@ cursor.execute('''
     )
 ''')
 # Ensure columns exist in migrated databases
-add_column_if_not_exists('fleet_vehicles', 'total_kwh', 'REAL DEFAULT 0')
-add_column_if_not_exists('fleet_vehicles', 'total_spend', 'REAL DEFAULT 0')
+add_column_if_not_exists('fleet_vehicles', 'total_energy', 'REAL DEFAULT 0')
+add_column_if_not_exists('fleet_vehicles', 'total_cost', 'REAL DEFAULT 0')
 add_column_if_not_exists('fleet_vehicles', 'status', "TEXT DEFAULT 'idle'")
 add_column_if_not_exists('fleet_vehicles', 'battery_pct', 'INTEGER DEFAULT 80')
 add_column_if_not_exists('fleet_vehicles', 'lat', 'REAL')
