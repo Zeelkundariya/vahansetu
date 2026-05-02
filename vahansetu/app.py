@@ -201,11 +201,15 @@ def seed_user_data(user_id, conn):
     conn.commit()
 
 # Ensure DB is initialized
+print("🚀 VahanSetu: Initializing Core Persistence Engine...")
 init_db()
+print("✅ VahanSetu: Database integrity verified.")
 
 # Start Simulation background thread AFTER DB is ready
 import threading
-threading.Thread(target=run_simulations, daemon=True).start()
+if not os.environ.get('WERKZEUG_RUN_MAIN'): # Prevent double-start in debug mode
+    print("📡 VahanSetu: Starting AI Charge Intelligence Pulse...")
+    threading.Thread(target=run_simulations, daemon=True).start()
 
 
 # ---------- Identity Management ----------
