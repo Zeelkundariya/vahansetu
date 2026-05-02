@@ -428,7 +428,7 @@ def api_fleet():
         # 🧪 AUTO-HEAL: If vehicles are missing, force seed them now for this user
         v_count = conn.execute('SELECT COUNT(*) FROM fleet_vehicles WHERE fleet_id = ?', (fleet['id'],)).fetchone()[0]
         if v_count == 0:
-            print(f"🛠️ AUTO-HEAL: Seeding data for User {current_user.id}...")
+            print(f"AUTO-HEAL: Seeding data for User {current_user.id}...")
             seed_user_data(current_user.id, conn)
             conn.commit()
             
@@ -440,7 +440,7 @@ def api_fleet():
 
         totals = conn.execute('SELECT SUM(total_energy), SUM(total_cost), AVG(battery_pct) FROM fleet_vehicles WHERE fleet_id = ?', (fleet['id'],)).fetchone()
         
-        print(f"✅ VAHAN DEBUG: UserID={current_user.id}, FleetID={fleet['id']}, VehiclesFound={len(vehicles)}, SessionsFound={len(sessions_raw)}")
+        print(f"VAHAN DEBUG: UserID={current_user.id}, FleetID={fleet['id']}, VehiclesFound={len(vehicles)}, SessionsFound={len(sessions_raw)}")
         
         return jsonify({
             'fleet': dict(fleet), 
@@ -453,7 +453,7 @@ def api_fleet():
         })
     except Exception as e:
         import traceback
-        print("❌ VAHANSETU API ERROR (Database issue):")
+        print("VAHANSETU API ERROR (Database issue):")
         traceback.print_exc()
         
         # 🛡️ EMERGENCY FALLBACK: If DB fails, return beautiful demo data so the UI still looks perfect

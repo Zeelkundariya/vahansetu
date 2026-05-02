@@ -1,0 +1,264 @@
+{
+  "info": {
+    "name": "VahanSetu Enterprise API",
+    "description": "Public API documentation for VahanSetu - India's Premier EV Charging Network. This collection includes endpoints for Authentication, Fleet Operations, CPO Management, and Network Mapping.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://vahansetu.onrender.com",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Demo User\",\n  \"email\": \"demo@vahansetu.com\",\n  \"password\": \"secure123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/signup",
+              "host": ["{{base_url}}"],
+              "path": ["signup"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@vahansetu.com\",\n  \"password\": \"secure123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/logout?api=true",
+              "host": ["{{base_url}}"],
+              "path": ["logout"],
+              "query": [
+                { "key": "api", "value": "true" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Fleet Operations",
+      "item": [
+        {
+          "name": "Get Fleet Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/fleet",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fleet"]
+            }
+          }
+        },
+        {
+          "name": "Add Vehicle to Fleet",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicle_name\": \"Tata Nexon EV\",\n  \"vehicle_number\": \"GJ-01-EV-8899\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fleet/add",
+              "host": ["{{base_url}}"],
+              "path": ["fleet", "add"]
+            }
+          }
+        },
+        {
+          "name": "Vehicle Lookup (RTO Mock)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plate_number\": \"GJ-01-AX-9999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/vehicle/lookup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "vehicle", "lookup"]
+            }
+          }
+        },
+        {
+          "name": "Delete Vehicle",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/fleet/vehicle/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fleet", "vehicle", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. CPO & Infrastructure",
+      "item": [
+        {
+          "name": "Get Host Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/host/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["api", "host", "dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Deploy Station Node",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nexus Hub East\",\n  \"address\": \"Science City Road, Ahmedabad\",\n  \"lat\": 23.0725,\n  \"lng\": 72.5164,\n  \"connector\": \"CCS2 Combo\",\n  \"power\": 150,\n  \"bays\": 8\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/host/deploy",
+              "host": ["{{base_url}}"],
+              "path": ["api", "host", "deploy"]
+            }
+          }
+        },
+        {
+          "name": "Decommission Station",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/host/station/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "host", "station", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Platform Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics_data",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analytics_data"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Network & Maps",
+      "item": [
+        {
+          "name": "Get Nearby Stations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/stations?lat=23.0225&lng=72.5714",
+              "host": ["{{base_url}}"],
+              "path": ["api", "stations"],
+              "query": [
+                { "key": "lat", "value": "23.0225" },
+                { "key": "lng", "value": "72.5714" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "AI Trip Plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/trip_plan?start=Ahmedabad&end=Surat&lat=23.0225&lng=72.5714",
+              "host": ["{{base_url}}"],
+              "path": ["api", "trip_plan"],
+              "query": [
+                { "key": "start", "value": "Ahmedabad" },
+                { "key": "end", "value": "Surat" },
+                { "key": "lat", "value": "23.0225" },
+                { "key": "lng", "value": "72.5714" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. User Profile",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"VahanSetu Executive\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/profile/update",
+              "host": ["{{base_url}}"],
+              "path": ["api", "profile", "update"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
