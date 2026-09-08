@@ -23,7 +23,6 @@ pip-log.txt
 
 # ── Frontend Lifecycle ──
 node_modules/
-dist/
 dist-ssr/
 *.local
 .eslintcache

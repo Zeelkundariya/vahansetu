@@ -8,8 +8,6 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
-import { Helmet } from 'react-helmet-async';
-import * as Yup from 'yup';
 
 function CountUp({ value, suffix = '', duration = 2000 }) {
   const [display, setDisplay] = useState(0);
@@ -35,19 +33,6 @@ function CountUp({ value, suffix = '', duration = 2000 }) {
   return <span>{formatted}{suffix}</span>;
 }
 
-const authSchema = Yup.object().shape({
-  name: Yup.string().test('is-signup', '🛡️ Name required for identity provisioning.', function(value) {
-    return this.parent.authTab === 'login' || (value && value.trim().length > 0);
-  }),
-  email: Yup.string()
-    .email('⚠️ Invalid gmail protocol.')
-    .required('🛡️ Identity required.')
-    .matches(/@gmail\.com$/, '⚠️ Only Gmail accounts accepted in this sector.'),
-  password: Yup.string()
-    .min(6, '⚠️ Access key must be 6+ characters.')
-    .required('🛡️ Access key required.')
-});
-
 export default function LandingPage() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
@@ -61,10 +46,9 @@ export default function LandingPage() {
   }, [authTab]);
 
   const handleAuth = async (e) => {
-    if (e) e.preventDefault();
+    e.preventDefault();
     setLoading(true);
     try {
-      await authSchema.validate({ ...formData, authTab });
       const endpoint = authTab === 'login' ? '/login' : '/signup';
       const { data } = await api.post(endpoint, formData);
       if (data.success) {
@@ -80,11 +64,19 @@ export default function LandingPage() {
         showToast(data.message || 'Authentication Failure', 'error');
       }
     } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        showToast(err.message, 'warning');
-      } else {
-        showToast(err.response?.data?.message || 'Security Protocol: Connection Refused', 'error');
+      let msg = err.response?.data?.message;
+      if (!msg) {
+        if (err.response?.status >= 500) {
+          msg = 'Subsystem warming up on cloud server. Please retry in 10-15 seconds.';
+        } else if (err.code === 'ECONNABORTED') {
+          msg = 'Connection timed out. Server instance waking up, please retry.';
+        } else if (err.response?.status === 401) {
+          msg = 'Invalid credentials. Please verify your email and access key.';
+        } else {
+          msg = 'Network connection interrupted. Please try again.';
+        }
       }
+      showToast(msg, 'error');
     } finally {
       setLoading(false);
     }
@@ -92,10 +84,6 @@ export default function LandingPage() {
 
   return (
     <div className="landing-wrapper">
-      <Helmet>
-        <title>VahanSetu — Bridge to the Electric Future</title>
-        <meta name="description" content="India's most advanced EV charging network. Discover stations in real-time, plan AI-optimized routes, and manage your fleet." />
-      </Helmet>
       {/* ── LANDING NAVBAR ── */}
       <nav className="vs-navbar" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000, padding: '18px 80px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', backdropFilter: 'none' }}>
         <Link to="/" className="vs-logo" style={{ textDecoration: 'none' }}>
@@ -132,6 +120,17 @@ export default function LandingPage() {
             plan AI-optimized routes, manage your fleet, and monitor live availability —
             all in one cinematic platform.
           </p>
+          
+          <div className="vs-grid-hud" style={{ position: 'absolute', top: 0, left: 0, right: 0, borderTopLeftRadius: 24, borderTopRightRadius: 24, background: 'rgba(0,240,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="vs-pulse-dot" style={{ background: 'var(--cyan)' }}></div>
+              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--cyan)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Grid Intel: Active</span>
+            </div>
+            <div style={{ display: 'flex', gap: 16, fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+               <span>RATE: <span style={{ color: '#fff' }}>₹12.40/kWh</span></span>
+               <span>LOAD: <span style={{ color: 'var(--green)' }}>34% (Optimized)</span></span>
+            </div>
+          </div>
 
           <div className="hero-cta">
             <Link to="/map" className="vs-btn vs-btn-primary vs-icon-text" style={{ padding: '15px 32px', fontSize: '1rem', borderRadius: 14 }}>
@@ -164,73 +163,45 @@ export default function LandingPage() {
 
             <div className="auth-panels">
               <div className="auth-panel active">
-                <div className="auth-title">
-                  {user ? `Welcome back, ${user.name.split(' ')[0]}` : (authTab === 'login' ? 'Welcome back' : 'Join VahanSetu')}
-                </div>
+                <div className="auth-title">{authTab === 'login' ? 'Welcome back' : 'Join VahanSetu'}</div>
                 <div className="auth-caption">
-                  {user ? 'You are currently authenticated in the VahanSetu Nexus.' : (authTab === 'login' ? 'Sign in to your VahanSetu account' : 'Create your free account in seconds')}
+                  {authTab === 'login' ? 'Sign in to your VahanSetu account' : 'Create your free account in seconds'}
                 </div>
 
-                {user ? (
-                  <div style={{ marginTop: 24 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '15px', background: 'rgba(0,240,255,0.05)', borderRadius: '12px', border: '1px solid rgba(0,240,255,0.1)', marginBottom: '24px' }}>
-                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#000' }}>
-                         {user.name && user.name[0].toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--cyan)', fontWeight: 700 }}>SESSION ACTIVE</div>
-                      </div>
-                    </div>
-                    <Link to="/map" className="vs-btn vs-btn-primary auth-submit" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                       Enter the Network <ArrowRight size={18} />
-                    </Link>
-                    <button onClick={async () => {
-                       const { logout } = await import('../api');
-                       await logout();
-                       setUser(null);
-                    }} className="vs-btn vs-btn-secondary" style={{ width: '100%', marginTop: 12, border: '1px solid rgba(255,255,255,0.1)' }}>
-                       Sign Out
-                    </button>
+                <form onSubmit={handleAuth}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, fontSize: '0.65rem', fontWeight: 800, color: authTab === 'login' ? 'var(--cyan)' : 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.1em', background: authTab === 'login' ? 'rgba(0,240,255,0.05)' : 'rgba(0,255,135,0.05)', padding: '8px 12px', borderRadius: 6, width: 'fit-content' }}>
+                    {authTab === 'login' ? <ShieldCheck size={12} /> : <UserPlus size={12} />}
+                    {authTab === 'login' ? 'Security Protocol Active' : 'Identity Provisioning'}
                   </div>
-                ) : (
-                  <form onSubmit={handleAuth}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, fontSize: '0.65rem', fontWeight: 800, color: authTab === 'login' ? 'var(--cyan)' : 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.1em', background: authTab === 'login' ? 'rgba(0,240,255,0.05)' : 'rgba(0,255,135,0.05)', padding: '8px 12px', borderRadius: 6, width: 'fit-content' }}>
-                      {authTab === 'login' ? <ShieldCheck size={12} /> : <UserPlus size={12} />}
-                      {authTab === 'login' ? 'Security Protocol Active' : 'Identity Provisioning'}
-                    </div>
 
-                    {authTab === 'signup' && (
-                      <div className="vs-float-group">
-                        <input className="vs-float-input" type="text" required placeholder=" " value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                        <label className="vs-float-label">Full Legal Name</label>
-                      </div>
-                    )}
-
+                  {authTab === 'signup' && (
                     <div className="vs-float-group">
-                      <input className="vs-float-input" type="email" required placeholder=" " value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-                      <label className="vs-float-label">Gmail Identity (@gmail.com)</label>
+                      <input className="vs-float-input" type="text" required placeholder=" " value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                      <label className="vs-float-label">Full Legal Name</label>
                     </div>
+                  )}
 
-                    <div className="vs-float-group">
-                      <input className="vs-float-input" type="password" required placeholder=" " value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
-                      <label className="vs-float-label">Access Key (min 6 chars)</label>
-                    </div>
+                  <div className="vs-float-group">
+                    <input className="vs-float-input" type="email" required placeholder=" " value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                    <label className="vs-float-label">Gmail Identity (@gmail.com)</label>
+                  </div>
 
-                    <button type="submit" disabled={loading} className="vs-btn vs-btn-primary auth-submit">
-                      {loading ? 'Processing...' : (authTab === 'login' ? 'Enter the Network →' : 'Create Account — It\'s Free')}
-                    </button>
-                  </form>
-                )}
+                  <div className="vs-float-group">
+                    <input className="vs-float-input" type="password" required placeholder=" " value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+                    <label className="vs-float-label">Access Key (min 6 chars)</label>
+                  </div>
 
-                {!user && (
-                  <p style={{ textAlign: 'center', marginTop: 20, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    {authTab === 'login' ? "Don't have an account?" : "Already have an account?"}
-                    <button onClick={() => setAuthTab(authTab === 'login' ? 'signup' : 'login')} style={{ color: 'var(--cyan)', fontWeight: 600, background: 'none', border: 'none', marginLeft: 5, cursor: 'pointer' }}>
-                      {authTab === 'login' ? "Create one free" : "Sign in instead"}
-                    </button>
-                  </p>
-                )}
+                  <button type="submit" disabled={loading} className="vs-btn vs-btn-primary auth-submit">
+                    {loading ? 'Processing...' : (authTab === 'login' ? 'Enter the Network →' : 'Create Account — It\'s Free')}
+                  </button>
+                </form>
+
+                <p style={{ textAlign: 'center', marginTop: 20, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  {authTab === 'login' ? "Don't have an account?" : "Already have an account?"}
+                  <button onClick={() => setAuthTab(authTab === 'login' ? 'signup' : 'login')} style={{ color: 'var(--cyan)', fontWeight: 600, background: 'none', border: 'none', marginLeft: 5, cursor: 'pointer' }}>
+                    {authTab === 'login' ? "Create one free" : "Sign in instead"}
+                  </button>
+                </p>
               </div>
             </div>
           </div>
@@ -240,20 +211,20 @@ export default function LandingPage() {
       {/* ── STATS BAR ── */}
       <div className="stats-bar">
         <div className="stat-item">
-          <div className="num"><CountUp value={500} suffix="+" /></div>
-          <div className="stat-label">Charging Stations</div>
+          <div className="num"><CountUp value={582} suffix="+" /></div>
+          <div className="stat-label">OCPP Linked Nodes</div>
         </div>
         <div className="stat-item">
-          <div className="num"><CountUp value={12} suffix="k+" /></div>
-          <div className="stat-label">Active Users</div>
+          <div className="num"><CountUp value={14.8} suffix="k" /></div>
+          <div className="stat-label">Active VS ID Profiles</div>
         </div>
         <div className="stat-item">
-          <div className="num"><CountUp value={99} suffix="%" /></div>
-          <div className="stat-label">Network Uptime</div>
+          <div className="num"><CountUp value={840} suffix="+" /></div>
+          <div className="stat-label">Trees Saved Equiv.</div>
         </div>
         <div className="stat-item">
-          <div className="num"><CountUp value={2.8} suffix="M kWh" /></div>
-          <div className="stat-label">Energy Delivered</div>
+          <div className="num"><CountUp value={42.5} suffix="t" /></div>
+          <div className="stat-label">CO2 Offset Pulse</div>
         </div>
       </div>
 
