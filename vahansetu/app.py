@@ -1,15 +1,3 @@
-# VahanSetu Backend — Flask REST API & Real-Time EV Management Engine
-# ─────────────────────────────────────────────────────────────────────────────
-# This file is the complete backend for VahanSetu.
-# It handles:
-# 1. User Authentication (Login, Signup, JWT tokens, Session management)
-# 2. EV Fleet Management (Vehicle status, battery %, energy consumption)
-# 3. Charging Station Management (CPO Host dashboard, adding stations)
-# 4. Smart Trip Planner (Route planning using OSRM and charging stations along the route)
-# 5. Live Telemetry & Digital Twin (OBD-II hardware battery cell simulation)
-# 6. Carbon Credits & VahanPay Wallet (UPI Top-up, Withdrawals, Carbon Marketplace)
-# ─────────────────────────────────────────────────────────────────────────────
-
 # Standard Python and Flask imports
 from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, send_from_directory
 from flask_cors import CORS
